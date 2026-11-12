@@ -8,3 +8,6 @@ glasgow-rain/
 
 .claude/
 .DS_Store
+
+# private: my CV must never be published with the site
+cv/

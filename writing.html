@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Writing — Rehman Khaliq</title>
+<meta name="description" content="Short notes on what went wrong, and what I learned, building each of my projects.">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<!-- how the link looks when shared on LinkedIn, WhatsApp and so on -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://rehman20050409.github.io/writing.html">
+<meta property="og:title" content="Writing — Rehman Khaliq">
+<meta property="og:description" content="Short notes on what went wrong, and what I learned, building each of my projects.">
+<meta property="og:image" content="https://rehman20050409.github.io/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<nav aria-label="Main">
+  <a class="logo" href="index.html" aria-label="Home">rk</a>
+  <ul>
+    <li><a href="projects.html">Projects</a></li>
+    <li><a href="writing.html" aria-current="page">Writing</a></li>
+    <li><a href="https://github.com/Rehman20050409" target="_blank" rel="noopener noreferrer">Github</a></li>
+    <li><a href="https://www.linkedin.com/in/rehman-khaliq-noreen-98ab3a449/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+  </ul>
+</nav>
+
+<main id="main">
+  <h1>writing</h1>
+  <p class="lead">Short notes on what went wrong, and what I learned, building each project.</p>
+
+  <!-- To add a note, copy one <article class="post"> block. Its id is what projects.html links to. -->
+  <article class="post" id="split">
+    <h2>The login limit that an attacker could switch off</h2>
+    <small>Split · November 2026</small>
+    <p>Split makes you wait 15 minutes after ten wrong passwords. I counted wrong tries per visitor address and email together, so that one person's wrong guesses could not lock anyone else out. Behind a hosting provider the visitor's address arrives in a header called <code>X-Forwarded-For</code>, so that is what the server read.</p>
+    <p>The problem is that the visitor can write that header themselves. I tested it against the live site: twelve wrong tries, each claiming a different address, and every one was let through. Without the fake header, the eleventh was blocked. The limit only worked on people who weren't trying to get round it.</p>
+    <p>The fix deleted code. Wrong tries are now counted per email and nothing else, and the same test against the live site stops at ten. It has a cost: someone who knows your email can lock you out for fifteen minutes at a time. I think that is the right trade, but it is a trade, and I wrote it down in the code where the next person will see it.</p>
+    <p>What I took from it: a security feature is not finished when it works for honest users. It is finished when you have tried to beat it yourself.</p>
+    <p class="links"><a href="projects.html">See the project</a></p>
+  </article>
+
+  <article class="post" id="turtle">
+    <h2>Parsing a language where calls have no brackets</h2>
+    <small>Turtle · November 2026</small>
+    <p>In Turtle you write <code>side 300 4</code>, not <code>side(300, 4)</code>. It reads nicely, but it leaves the parser with a question it cannot answer by looking at the line: where do the arguments stop? <code>side 300 4 right 120</code> is two commands, and the only way to know that is to know <code>side</code> takes exactly two values.</p>
+    <p>It gets worse when a command calls itself, or is called above the place it is defined, because the parser reaches the call before it has seen the definition. My fix was a quick first pass over the whole program that only looks for definitions and counts their parameters. The real parse then starts already knowing how many values every command wants.</p>
+    <p>The other thing I had to plan for is that programs come from a text box, and people will write loops that never end. The interpreter counts its steps and its depth and stops with a normal error message, with a line number, instead of freezing the page.</p>
+    <p>One bug is still open: a drawing with tens of thousands of lines can fail without any message, because of how the page works out the drawing's size. The language is fine; the page around it is not. It is next on my list.</p>
+    <p class="links"><a href="projects.html">See the project</a></p>
+  </article>
+
+  <article class="post" id="scratch-reader">
+    <h2>My own test file only proved what I already believed</h2>
+    <small>Scratch Reader · November 2026</small>
+    <p>Scratch Reader opens a Scratch project and shows its blocks as code. I built it against a sample project I wrote by hand in Scratch's file format, and every test passed. That felt like done.</p>
+    <p>Then I ran it on 26 projects from the Scratch team's own test set. It read 23. The three that failed were zipped one folder deep, which my reader had never considered, because my sample was not. The same run showed a whole family of blocks coming out in a clumsy fallback form, and one block printing its name in quotes when it should not.</p>
+    <p>None of those were hard to fix. The point is that I could not have found them with my own sample, because I made the sample from the same understanding I wrote the code from. Any gap in one was a gap in the other.</p>
+    <p>The part that did hold up was the fallback: a block the reader has never heard of still prints as its name and inputs. Not pretty, but it meant unfamiliar projects produced readable output and never a crash.</p>
+    <p class="links"><a href="projects.html">See the project</a></p>
+  </article>
+
+  <article class="post" id="repo-timelapse">
+    <h2>Designing around sixty requests an hour</h2>
+    <small>Repo Time-lapse · November 2026</small>
+    <p>Repo Time-lapse shows a GitHub project growing over time. GitHub allows 60 requests an hour to visitors who are not signed in, and a project can have thousands of commits, so asking about each one was never possible. The limit became the design.</p>
+    <p>The page picks ten moments spread from the first commit to the latest. Commits arrive a hundred to a page, newest first, and the first response says how many pages exist, so the page fetches only the ones holding a moment it wants and never the same one twice. Each moment then costs one more request for its list of files. A typical project needs about twenty requests.</p>
+    <p>The drawing had its own problem. If each moment were laid out separately, every file would jump to a new position whenever time moved. So every file that ever existed is placed once, in one shared layout, and files only fade in and out.</p>
+    <p>A test also caught something I had not thought about: the page accepted <code>../etc/passwd</code> as a repository name. It was harmless here, but it is exactly the sort of input I should refuse on purpose and not by luck.</p>
+    <p class="links"><a href="projects.html">See the project</a></p>
+  </article>
+</main>
+
+<footer>
+  <a href="mailto:2765081k@student.gla.ac.uk">2765081k@student.gla.ac.uk</a>
+</footer>
+
+<script src="site.js"></script>
+</body>
+</html>

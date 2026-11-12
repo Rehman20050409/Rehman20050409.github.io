@@ -114,3 +114,22 @@ nav ul a[aria-current] { color: var(--text); }
   .project { grid-template-columns: 48px 1fr; gap: 14px; }
   .project > img { width: 48px; height: 48px; }
 }
+
+/* language switch on the home page intro */
+.langs { float: right; display: flex; gap: 4px; margin-top: 4px; animation: fade .6s .5s backwards; }
+.langs button {
+  font: inherit; font-size: 12px; color: var(--muted); background: none; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 99px; padding: 0 9px;
+}
+.langs button:hover { color: var(--text); }
+.langs button[aria-pressed="true"] { color: var(--text); border-color: var(--accent); }
+
+/* writing page */
+.post { padding-block: 28px; border-top: 1px solid var(--line); scroll-margin-top: 90px; }
+.post h2 { font-size: 18px; }
+.post p { margin: 10px 0 0; }
+.post small { display: block; }
+.post code { color: var(--text); font: 13px ui-monospace, Menlo, Consolas, monospace; background: color-mix(in srgb, var(--line) 45%, transparent); padding: 1px 5px; border-radius: 4px; }
+.post .links { margin-top: 14px; }
+
+@media (max-width: 420px) { nav ul { gap: 14px; } }

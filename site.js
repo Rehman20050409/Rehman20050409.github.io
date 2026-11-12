@@ -50,38 +50,88 @@ document.body.insertAdjacentHTML('afterbegin', `
   document.documentElement.addEventListener('pointerleave', () => react(-9999, -9999));
 })();
 
-// Entrance animation: wrap each word of the intro in a span so it can appear on its own delay,
-// then queue the project cards after the last word. Without JavaScript the page just shows as normal.
+// Entrance animation and language switch. Each word of the intro is wrapped in a span so it can
+// appear on its own delay, then the project cards follow the last word.
+// Without JavaScript the page just shows the English intro as normal.
 (() => {
-  let delay = 550; // the name finishes writing first
-  const nodes = [];
-  const intro = document.querySelector('.intro'); // only the home page has one
-  const walker = intro && document.createTreeWalker(intro, NodeFilter.SHOW_TEXT);
-  while (walker?.nextNode()) nodes.push(walker.currentNode);
-  // Each word waits a little longer than the last, but the whole intro never takes more than
-  // about a second, however much text is added later.
-  const wordCount = nodes.reduce((n, node) => n + node.textContent.trim().split(/\s+/).length, 0);
-  const step = Math.min(22, 1200 / Math.max(wordCount, 1));
-  for (const node of nodes) {
-    const parent = node.parentElement;
-    if (parent.closest('h1') || !node.textContent.trim()) continue;
-    if (parent.tagName === 'MARK') { // a highlighted phrase arrives whole, so its box never shows up empty
-      parent.classList.add('w');
-      parent.style.animationDelay = `${delay += step}ms`;
-      continue;
+  // Wraps every word under `root`, the first one appearing at `delay` ms. Returns the last delay used.
+  function revealWords(root, delay) {
+    const nodes = [];
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    // Each word waits a little longer than the last, but the whole intro never takes more than
+    // about a second, however much text is added later.
+    const wordCount = nodes.reduce((n, node) => n + node.textContent.trim().split(/\s+/).length, 0);
+    const step = Math.min(22, 1200 / Math.max(wordCount, 1));
+    for (const node of nodes) {
+      const parent = node.parentElement;
+      if (!node.textContent.trim()) continue;
+      if (parent.tagName === 'MARK') { // a highlighted phrase arrives whole, so its box never shows up empty
+        parent.classList.add('w');
+        parent.style.animationDelay = `${delay += step}ms`;
+        continue;
+      }
+      const words = document.createDocumentFragment();
+      for (const part of node.textContent.split(/(\s+)/)) {
+        if (!part.trim()) { words.append(part); continue; }
+        const span = document.createElement('span');
+        span.className = 'w';
+        span.textContent = part;
+        span.style.animationDelay = `${delay += step}ms`;
+        words.append(span);
+      }
+      node.replaceWith(words);
     }
-    const words = document.createDocumentFragment();
-    for (const part of node.textContent.split(/(\s+)/)) {
-      if (!part.trim()) { words.append(part); continue; }
-      const span = document.createElement('span');
-      span.className = 'w';
-      span.textContent = part;
-      span.style.animationDelay = `${delay += step}ms`;
-      words.append(span);
-    }
-    node.replaceWith(words);
+    return delay;
   }
-  for (const el of document.querySelectorAll('#projects-title, .grid li, .project')) {
+
+  let delay = 550; // the name finishes writing first
+  const blocks = [...document.querySelectorAll('.intro [lang]')]; // only the home page has these
+  if (blocks.length) {
+    const NAMES = { en: 'English', es: 'Español', ca: 'Català' };
+    const revealed = new Set();
+    const switcher = document.createElement('div');
+    switcher.className = 'langs';
+    switcher.setAttribute('role', 'group');
+    switcher.setAttribute('aria-label', 'Language');
+
+    // Showing a block again replays its word-by-word reveal, because CSS animations restart
+    // whenever an element goes from hidden to shown.
+    const show = (lang, startDelay) => {
+      let end = startDelay;
+      for (const block of blocks) {
+        block.hidden = block.lang !== lang;
+        if (!block.hidden && !revealed.has(block)) {
+          revealed.add(block);
+          end = revealWords(block, startDelay);
+        }
+      }
+      for (const button of switcher.children) button.setAttribute('aria-pressed', button.lang === lang);
+      return end;
+    };
+
+    for (const block of blocks) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.lang = block.lang;
+      button.textContent = block.lang.toUpperCase();
+      button.setAttribute('aria-label', NAMES[block.lang] ?? block.lang);
+      button.addEventListener('click', () => {
+        show(block.lang, 0);
+        try { localStorage.setItem('lang', block.lang); } catch { /* private browsing: just don't remember */ }
+      });
+      switcher.append(button);
+    }
+    blocks[0].before(switcher);
+
+    // Start in the visitor's last choice, else their browser's language if it is one of ours, else English.
+    let saved = null;
+    try { saved = localStorage.getItem('lang'); } catch { /* storage blocked */ }
+    const wanted = [saved, navigator.language?.slice(0, 2).toLowerCase(), 'en'];
+    delay = show(wanted.find((lang) => blocks.some((block) => block.lang === lang)), delay);
+  }
+
+  for (const el of document.querySelectorAll('#projects-title, .grid li, .project, .post')) {
     el.classList.add('pop');
     el.style.animationDelay = `${delay += 90}ms`;
   }
