@@ -25,6 +25,31 @@ document.body.insertAdjacentHTML('afterbegin', `
 </div>
 `);
 
+// Flowers perk up when the cursor (or a finger) comes near. They sit behind the page, where
+// CSS :hover can't reach them, so this measures the distance to each one instead.
+(() => {
+  const flowers = [...document.querySelectorAll('.flowers svg')].slice(1); // the first svg only holds the shape
+  let queued = false;
+  const react = (x, y) => {
+    for (const flower of flowers) {
+      const box = flower.getBoundingClientRect();
+      const distance = Math.hypot(x - (box.left + box.width / 2), y - (box.top + box.height / 2));
+      flower.classList.toggle('near', distance < box.width / 2 + 24);
+    }
+  };
+  const onMove = (event) => {
+    if (queued) return; // at most one measurement per frame
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      react(event.clientX, event.clientY);
+    });
+  };
+  addEventListener('pointermove', onMove);
+  addEventListener('pointerdown', onMove);
+  document.documentElement.addEventListener('pointerleave', () => react(-9999, -9999));
+})();
+
 // Entrance animation: wrap each word of the intro in a span so it can appear on its own delay,
 // then queue the project cards after the last word. Without JavaScript the page just shows as normal.
 (() => {

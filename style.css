@@ -13,6 +13,12 @@
 .flowers svg { animation: fade 1.4s var(--bloom, .7s) backwards; }
 .flowers svg:nth-child(3n) { --bloom: .3s; }
 .flowers svg:nth-child(3n+1) { --bloom: 1.1s; }
+/* a flower perks up when the cursor comes near; site.js adds and removes "near" */
+.flowers svg { transition: scale .5s cubic-bezier(.3, 1.6, .5, 1), rotate .6s ease-out, opacity .4s, filter .4s; }
+.flowers svg.near { scale: 1.35; rotate: 30deg; opacity: .95; filter: blur(calc(var(--b, 6px) * .25)); }
+@media (prefers-reduced-motion: reduce) {
+  .flowers svg.near { scale: none; rotate: none; }
+}
 @media (prefers-reduced-motion: no-preference) {
   .flowers svg {
     animation: bloom 1.4s var(--bloom, .7s) cubic-bezier(.2, .7, .2, 1) backwards,
@@ -46,13 +52,20 @@ body {
 a { color: inherit; }
 :focus-visible { outline: 2px solid var(--text); outline-offset: 3px; border-radius: 4px; }
 .skip { position: absolute; left: -999px; }
-.skip:focus { left: 16px; top: 16px; background: var(--bg); padding: 8px; z-index: 2; }
+.skip:focus { left: 16px; top: 16px; background: var(--bg); padding: 8px; z-index: 3; }
 
 nav, main, footer { max-width: 640px; margin: 0 auto; padding: 0 20px; }
 nav {
   position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center;
-  padding-block: 20px; background: color-mix(in srgb, var(--bg) 55%, transparent);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  padding-block: 20px; z-index: 2;
+}
+/* A soft veil across the top of the window in place of a solid bar: the page blurs and
+   fades out as it scrolls under the links, with no edge to see. */
+body::before {
+  content: ''; position: fixed; inset: 0 0 auto; height: 120px; z-index: 1; pointer-events: none;
+  background: linear-gradient(color-mix(in srgb, var(--bg) 90%, transparent) 40%, transparent);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  mask-image: linear-gradient(#000 45%, transparent); -webkit-mask-image: linear-gradient(#000 45%, transparent);
 }
 nav .logo {
   font: 600 22px/1 Caveat, cursive; color: var(--bg); background: var(--accent); text-decoration: none;
