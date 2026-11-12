@@ -1,0 +1,7 @@
+# each project lives in its own repo
+turtle-lang/
+scratch-reader/
+expense-splitter/
+
+.claude/
+.DS_Store
