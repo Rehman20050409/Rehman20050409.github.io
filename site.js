@@ -58,12 +58,16 @@ document.body.insertAdjacentHTML('afterbegin', `
   const intro = document.querySelector('.intro'); // only the home page has one
   const walker = intro && document.createTreeWalker(intro, NodeFilter.SHOW_TEXT);
   while (walker?.nextNode()) nodes.push(walker.currentNode);
+  // Each word waits a little longer than the last, but the whole intro never takes more than
+  // about a second, however much text is added later.
+  const wordCount = nodes.reduce((n, node) => n + node.textContent.trim().split(/\s+/).length, 0);
+  const step = Math.min(22, 1200 / Math.max(wordCount, 1));
   for (const node of nodes) {
     const parent = node.parentElement;
     if (parent.closest('h1') || !node.textContent.trim()) continue;
     if (parent.tagName === 'MARK') { // a highlighted phrase arrives whole, so its box never shows up empty
       parent.classList.add('w');
-      parent.style.animationDelay = `${delay += 22}ms`;
+      parent.style.animationDelay = `${delay += step}ms`;
       continue;
     }
     const words = document.createDocumentFragment();
@@ -72,7 +76,7 @@ document.body.insertAdjacentHTML('afterbegin', `
       const span = document.createElement('span');
       span.className = 'w';
       span.textContent = part;
-      span.style.animationDelay = `${delay += 22}ms`;
+      span.style.animationDelay = `${delay += step}ms`;
       words.append(span);
     }
     node.replaceWith(words);
