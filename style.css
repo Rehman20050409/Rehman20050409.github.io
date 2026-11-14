@@ -71,7 +71,7 @@ nav .logo {
   width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
 }
 nav ul { display: flex; gap: 20px; list-style: none; margin: 0; padding: 0; }
-nav ul a { text-decoration: none; }
+nav ul a { text-decoration: none; padding-block: 10px; } /* a taller area to tap, same look */
 nav ul a:hover { color: var(--text); }
 
 main { padding-block: 72px 96px; }
@@ -93,11 +93,14 @@ mark { background: var(--mark); color: var(--mark-text); padding: 1px 5px; borde
 a.card .thumb { transition: border-color .15s, transform .15s; }
 a.card:hover .thumb { border-color: var(--accent); transform: translateY(-2px); }
 
-footer { border-top: 1px solid var(--line); padding-block: 24px 48px; font-size: 14px; }
+footer { border-top: 1px solid var(--line); padding-block: 16px 40px; font-size: 14px; display: flex; flex-wrap: wrap; gap: 0 22px; align-items: center; }
+footer span { color: var(--text); margin-right: auto; }
+footer a { padding-block: 8px; }
+footer a:hover { color: var(--text); }
 
 /* shared bits used by both pages */
 nav ul a[aria-current] { color: var(--text); }
-.more { float: right; font-size: 14px; text-decoration: none; }
+.more { float: right; font-size: 14px; text-decoration: none; padding-block: 8px; margin-top: -8px; }
 .more:hover { color: var(--text); }
 
 /* projects page */
@@ -119,7 +122,7 @@ nav ul a[aria-current] { color: var(--text); }
 .langs { float: right; display: flex; gap: 4px; margin-top: 4px; animation: fade .6s .5s backwards; }
 .langs button {
   font: inherit; font-size: 12px; color: var(--muted); background: none; cursor: pointer;
-  border: 1px solid var(--line); border-radius: 99px; padding: 0 9px;
+  border: 1px solid var(--line); border-radius: 99px; padding: 4px 11px;
 }
 .langs button:hover { color: var(--text); }
 .langs button[aria-pressed="true"] { color: var(--text); border-color: var(--accent); }
@@ -133,3 +136,12 @@ nav ul a[aria-current] { color: var(--text); }
 .post .links { margin-top: 14px; }
 
 @media (max-width: 420px) { nav ul { gap: 14px; } }
+
+/* On a phone a full-width picture per project means a lot of scrolling, so each card becomes
+   a row: picture on the left, name and description beside it. */
+@media (max-width: 480px) {
+  .grid { grid-template-columns: 1fr; gap: 14px; }
+  .card { display: grid; grid-template-columns: 124px 1fr; column-gap: 14px; align-content: center; }
+  .card .thumb { grid-row: span 2; margin: 0; }
+  .card strong { align-self: end; }
+}

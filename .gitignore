@@ -11,3 +11,6 @@ glasgow-rain/
 
 # private: my CV must never be published with the site
 cv/
+
+# browser automation scratch files: may contain private pages, never publish
+.playwright-mcp/
